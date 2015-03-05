@@ -2,6 +2,21 @@ from strato.racktest.infra.suite import *
 from example_seeds import addition
 import time
 
+SIGNALLED_CALLABLE_CODE = """
+import signal
+import time
+signalReceived = None
+
+def signalHandler(sigNum, _):
+    global signalReceived
+    signalReceived = sigNum
+
+signal.signal(signal.SIGUSR2, signalHandler)
+
+while not signalReceived:
+    time.sleep(1)
+"""
+
 
 class Test:
     HOSTS = dict(it=dict(rootfs="rootfs-basic"))
@@ -49,3 +64,14 @@ class Test:
             else:
                 break
         TS_ASSERT_EQUALS(forked.poll(), False)
+
+        forked = host.it.seed.forkCode(SIGNALLED_CALLABLE_CODE, takeSitePackages=True)
+        TS_ASSERT(forked.poll() is None)
+        TS_ASSERT(forked.poll() is None)
+        forked.kill('USR2')
+        for i in xrange(10):
+            if forked.poll() is None:
+                time.sleep(1)
+            else:
+                break
+        TS_ASSERT_EQUALS(forked.poll(), True)

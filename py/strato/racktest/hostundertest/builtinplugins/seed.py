@@ -130,8 +130,8 @@ class _Forked:
         host.ssh.run.backgroundScript(
             "echo $$ > /tmp/pid%(unique)s.txt\n"
             "PYTHONPATH=/tmp/seed%(unique)s.egg "
-            "python -m seedentrypoint >& /tmp/output%(unique)s.txt" % dict(
-                unique=unique))
+            "exec python -m seedentrypoint >& /tmp/output%(unique)s.txt" % dict(unique=unique)
+        )
         self._pid = self._getPid()
 
     def _getPid(self):
@@ -156,10 +156,10 @@ class _Forked:
     def output(self):
         return self._host.ssh.ftp.getContents("/tmp/output%s.txt" % self._unique)
 
-    def kill(self, signalName=None):
-        if signalName is None:
-            signalName = '9'
-        self._host.ssh.run.script("kill -%s %s" % (signalName, self._pid))
+    def kill(self, signalNameOrNumber=None):
+        if signalNameOrNumber is None:
+            signalNameOrNumber = 'TERM'
+        self._host.ssh.run.script("kill -%s %s" % (str(signalNameOrNumber), self._pid))
 
 
 plugins.register('seed', Seed)
