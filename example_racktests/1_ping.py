@@ -8,3 +8,7 @@ class Test:
     def run(self):
         host.first.ssh.run.script("ping -c 1 %s" % host.second.node.ipAddress())
         host.second.ping.once(host.first)
+
+    def tearDown(self):
+        assert anamnesis['testSucceeded']
+        assert not anamnesis['testFailed']

@@ -118,11 +118,13 @@ class Executioner:
         logging.progress("Running test in '%(filename)s'", dict(filename=self._filename()))
         try:
             self._test.run()
+            suite.anamnesis['testSucceeded'] = True
             logging.success(
                 "Test completed successfully, in '%(filename)s', with %(asserts)d successfull asserts",
                 dict(filename=self._filename(), asserts=suite.successfulTSAssertCount()))
             print ".:1: Test passed"
         except:
+            suite.anamnesis['testFailed'] = True
             logging.exception("Test failed, in '%(filename)s'", dict(filename=self._filename()))
             suite.outputExceptionStackTrace()
             raise

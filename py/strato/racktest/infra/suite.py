@@ -14,3 +14,4 @@ class _HostsGetter:
 
 
 host = _HostsGetter()
+anamnesis = dict(testFailed=False, testSucceeded=False)
