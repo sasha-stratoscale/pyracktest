@@ -16,6 +16,7 @@ class Executioner:
     ON_TIMEOUT_CALLBACK_TIMEOUT_DEFAULT = 5 * 60
     DISCARD_LOGGING_OF = (
         'paramiko',
+        'pika',
         'selenium.webdriver.remote.remote_connection',
         'requests.packages.urllib3.connectionpool')
 
@@ -32,8 +33,6 @@ class Executioner:
         return self._hosts
 
     def executeTestScenario(self):
-        timeoutthread.TimeoutThread(self._testTimeout, self._testTimedOut)
-        logging.info("Test timer armed. Timeout in %(seconds)d seconds", dict(seconds=self._testTimeout))
         discardinglogger.discardLogsOf(self.DISCARD_LOGGING_OF)
         self._hosts = dict()
         suite.findHost = self.host
@@ -44,6 +43,8 @@ class Executioner:
             self._test.hosts = self.hosts
         logging.info("Allocating Nodes")
         self._allocation = rackattackallocation.RackAttackAllocation(self._test.HOSTS)
+        timeoutthread.TimeoutThread(self._testTimeout, self._testTimedOut)
+        logging.info("Test timer armed. Timeout in %(seconds)d seconds", dict(seconds=self._testTimeout))
         logging.progress("Done allocating nodes")
         try:
             self._setUp()

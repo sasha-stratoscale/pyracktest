@@ -8,20 +8,23 @@ from strato.racktest.infra import rootfslabel
 import tempfile
 import os
 import shutil
+import time
 from strato.racktest.infra import logbeamfromlocalhost
 
 
 class RackAttackAllocation:
-    _TIMEOUT = 10 * 60
+    _NO_PROGRESS_TIMEOUT = 2 * 60
 
     def __init__(self, hosts):
         self._hosts = hosts
+        self._overallPercent = 0
         self._client = clientfactory.factory()
         self._allocation = self._client.allocate(
             requirements=self._rackattackRequirements(), allocationInfo=self._rackattackAllocationInfo())
+        self._allocation.registerProgressCallback(self._progress)
 #       self._allocation.setForceReleaseCallback()
         try:
-            self._allocation.wait(timeout=self._TIMEOUT)
+            self._waitForAllocation()
         except:
             logging.exception("Allocation failed, attempting post mortem")
             self._postMortemAllocation()
@@ -74,3 +77,24 @@ class RackAttackAllocation:
         finally:
             shutil.rmtree(tempDir, ignore_errors=True)
         logging.info("Beamed post mortem pack into %(filename)s", dict(filename=filename))
+
+    def _progress(self, overallPercent, event):
+        self._overallPercent = overallPercent
+
+    def _waitForAllocation(self):
+        INTERVAL = 5
+        lastOverallPercent = 0
+        lastOverallPercentChange = time.time()
+        while self._allocation.dead() is None:
+            try:
+                self._allocation.wait(timeout=INTERVAL)
+                return
+            except:
+                if self._overallPercent != lastOverallPercent:
+                    lastOverallPercent = self._overallPercent
+                    lastOverallPercentChange = time.time()
+                    logging.progress("Allocation %(percent)s%% complete", dict(percent=lastOverallPercent))
+                if time.time() > lastOverallPercentChange + self._NO_PROGRESS_TIMEOUT:
+                    raise Exception("Allocation progress hanged at %(percent)s%% for %(seconds)s seconds",
+                                    dict(percent=lastOverallPercent, seconds=INTERVAL))
+        raise Exception(self._allocation.dead())

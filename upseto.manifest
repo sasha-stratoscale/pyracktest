@@ -1,5 +1,5 @@
 requirements:
-- hash: d0c86c8c99fc32a5f3bce399e8907944cd0c5b11
+- hash: bbb60567d6aee38c69869859391ab12f8bf4a68e
   originURL: https://github.com/Stratoscale/rackattack-api.git
 - hash: 2ca11a8a377b19c4e34daf4b2a0353b1bd0889fd
   originURL: https://github.com/Stratoscale/pywhiteboxtest.git
