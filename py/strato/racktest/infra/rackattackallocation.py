@@ -96,5 +96,5 @@ class RackAttackAllocation:
                     logging.progress("Allocation %(percent)s%% complete", dict(percent=lastOverallPercent))
                 if time.time() > lastOverallPercentChange + self._NO_PROGRESS_TIMEOUT:
                     raise Exception("Allocation progress hanged at %(percent)s%% for %(seconds)s seconds",
-                                    dict(percent=lastOverallPercent, seconds=INTERVAL))
+                                    dict(percent=lastOverallPercent, seconds=self._NO_PROGRESS_TIMEOUT))
         raise Exception(self._allocation.dead())

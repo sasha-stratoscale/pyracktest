@@ -59,7 +59,7 @@ class Runner:
 
     def _killSubprocesses(self):
         for pid in self._pids:
-            signal.signal(signal.SIGTERM, pid)
+            os.kill(signal.SIGTERM, pid)
 
     def runSequential(self):
         for scenario in self._scenarios:
