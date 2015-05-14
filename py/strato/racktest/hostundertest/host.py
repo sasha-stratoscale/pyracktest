@@ -6,7 +6,7 @@ import strato.racktest.hostundertest.builtinplugins.seed
 import strato.racktest.hostundertest.builtinplugins.logbeamplugin
 
 
-class Host:
+class Host(object):
     def __init__(self, rackattackNode, name):
         self.node = rackattackNode
         self.name = name
